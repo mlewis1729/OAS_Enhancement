@@ -214,7 +214,7 @@ if __name__ == '__main__':
     df_out = pd.DataFrame(rows)
     print(df_out.to_string(index=False))
 
-    # Curves: more n/p values, 200 trials each
+    # Curves: more n/p values, 500 trials each
     curve_ratios = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 8.0, 10.0]
     results_curve = {}
     for n_ratio in curve_ratios:
