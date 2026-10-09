@@ -224,4 +224,4 @@ if __name__ == '__main__':
             results_curve[n_ratio][label] = run_simulation(
                 p, n, Sigma, dist, df, n_trials=500)
 
-    generate_figure(results_curve, fig_path='/home/ec2-user/claude_playzone/oas_simulation.pdf')
+    generate_figure(results_curve, fig_path='./oas_simulation.pdf')

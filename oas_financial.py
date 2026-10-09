@@ -240,4 +240,4 @@ if __name__ == '__main__':
                   f'imp={data[k]["pct_imp"]:.2f}%')
 
     generate_figure(window_dates, alphas, window_vix, var_dict,
-                    fig_path='/home/ec2-user/claude_playzone/oas_financial.pdf')
+                    fig_path='./oas_financial.pdf')
