@@ -1,1 +1,226 @@
-../OAS_Enhancement.tex
+\documentclass[10pt,twoside,titlepage]{article}   % Standard LaTeX
+\usepackage{amsmath,amssymb}    % For better support of math
+\usepackage{amsthm}
+\usepackage{url}
+\usepackage{graphicx}          % Enable for eps,jpeg figures
+
+\usepackage{afterpage}
+\usepackage{float}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+
+\urldef\HHIURL\url{https://en.wikipedia.org/wiki/Herfindahl%E2%80%93Hirschman_index#Effective_assets_in_a_portfolio}
+\urldef\CORRURL\url{https://stats.stackexchange.com/questions/226380/derivation-of-the-standard-error-for-pearsons-correlation-coefficient}
+\usepackage{dsfont}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+%% Controls spacing between lines (\doublespacing, \onehalfspacing, etc.):
+\usepackage{setspace}
+
+%% Use the line below for official NYU version, which requires
+%% double line spacing. For all other uses, this is unnecessary,
+%% so the line can be commented out.
+\doublespacing % requires package setspace, invoked above
+
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\begin{document}
+
+\title{Extending the Oracle Approximating Shrinkage to General Distribution}
+\author{Michael J. Lewis}
+\date{\copyright\today}         % change \today to a particular date
+
+\maketitle
+
+\begin{abstract}
+The Oracle Approximating Shrinkage (OAS) was created assuming an underlying Gaussian distribution.
+In this work, we extend the tool to all distributions with 4th moments.
+\end{abstract}
+
+\section{The formulation}\label{sec-formulation}
+This work should be seen as an extension of \cite{OAS}. To set the stage, we first port over the relevant equations.
+\begin{equation}
+\rho_O = \frac{ E \left[ \operatorname{Tr} \left( \left( \Sigma - \hat{S} \right) \left( \hat{F} - \hat{S} \right) \right) \right] }{ E \left[ \lVert \hat{S} - \hat{F} \rVert_F^2 \right] }
+\end{equation}
+\begin{equation}
+E \left[ \operatorname{Tr} \left( \left( \Sigma - \hat{S} \right) \left( \hat{F} - \hat{S} \right) \right) \right] =
+\frac{\operatorname{Tr}( \Sigma )}{p} E \left[ \operatorname{Tr}(\hat{S})\right] 
+- \frac{ E \left[ \operatorname{Tr}^2(\hat{S})\right] }{ p } \\
+- E \left[ \operatorname{Tr}(\Sigma \hat{S})\right]
++ E \left[ \operatorname{Tr}(\hat{S}^2)\right]
+\end{equation}
+\begin{equation}
+E \left[ \lVert \hat{S} - \hat{F} \rVert_F^2 \right] =
+E \left[ \operatorname{Tr}(\hat{S}^2)\right]
+- \frac{ E \left[ \operatorname{Tr}^2(\hat{S})\right] }{ p }
+\end{equation}
+\begin{equation}
+E \left[ \operatorname{Tr}(\hat{S})\right] = \operatorname{Tr}(\Sigma)
+\end{equation}
+It is at this point, we will deviate slightly from \cite{OAS} by considering the general distribution case.
+Observe that
+\begin{equation*}
+\begin{aligned}
+E \left[ \operatorname{Tr}(\hat{S}^2)\right] &= E \left[ \lVert \hat{S} \rVert_F^2 \right] \\
+&= \sum_{i,j} \frac{1}{n^2} \sum_{k,l} E \left[ X_i^k X_j^k X_i^l X_j^l \right] \\
+&= \sum_{i,j} \frac{1}{n^2} \left( \sum_{k \neq l} E \left[ X_i^k X_j^k X_i^l X_j^l \right] + \sum_{k = l} E \left[ X_i^k X_j^k X_i^l X_j^l \right] \right) \\
+&= \frac{n-1}{n} \sum_{i,j} \Sigma^2_{i,j} + \frac{1}{n^2} \sum_{i,j} \sum_k E \left[ (X_i^k)^2 (X_j^k)^2 \right] \\
+&= \frac{n-1}{n} \operatorname{Tr}(\Sigma^2) + \frac{1}{n} \sum_{i,j} E \left[ X_i^2 X_j^2 \right] \\
+\end{aligned}
+\end{equation*}
+Similarly,
+\begin{equation*}
+\begin{aligned}
+E \left[ \operatorname{Tr^2}(\hat{S})\right] &= E \left[ \sum_{i,j} S_{ii} S_{jj} \right] \\
+&= \sum_{i,j} \frac{1}{n^2} \sum_{k,l} E \left[  (X_i^k)^2  (X_j^l)^2  \right] \\
+&= \sum_{i,j} \frac{1}{n^2} \left( \sum_{k \neq l} E \left[  (X_i^k)^2  (X_j^l)^2  \right] + \sum_{k = l} E \left[  (X_i^k)^2  (X_j^l)^2  \right] \right) \\
+&= \frac{n-1}{n} \sum_{i,j} \Sigma_{ii} \Sigma_{jj} + \frac{1}{n^2} \sum_{i,j} \sum_k E \left[ (X_i^k)^2  (X_j^k)^2 \right] \\
+&= \frac{n-1}{n} \operatorname{Tr^2}(\Sigma) + \frac{1}{n} \sum_{i,j} E \left[ X_i^2  X_j^2 \right] \\
+\end{aligned}
+\end{equation*}
+In both cases, the term $E \left[ X_i^2  X_j^2 \right]$ shows up.
+For a centered general distribution with a 4th moment, we have
+\begin{equation}
+E \left[ X_i^2  X_j^2 \right] = \Sigma_{ii} \Sigma_{jj} + 2 \Sigma_{ij}^2 + \kappa( X_i, X_i, X_j, X_j )
+\end{equation}
+where $\kappa( X_i, X_i, X_j, X_j )$ represents the fourth-order joint cumulant. 
+Note that this cumulant vanishes for a gaussian distribution. 
+Thus,
+\begin{equation}
+\label{fourth_moment_eqn}
+\sum_{i,j} E \left[ X_i^2  X_j^2 \right] = \operatorname{Tr^2}(\Sigma) + 2 \operatorname{Tr}(\Sigma^2) + \sum_{i,j} \kappa( X_i, X_i, X_j, X_j )
+\end{equation}
+Let $\alpha =\sum_{i,j} \kappa( X_i, X_i, X_j, X_j )$. 
+
+Returning to the above,
+\begin{equation}
+E \left[ \operatorname{Tr}(\hat{S}^2)\right] = \frac{n+1}{n} \operatorname{Tr}(\Sigma^2) + \frac{1}{n} \operatorname{Tr^2}(\Sigma) + \frac{\alpha}{n}
+\end{equation}
+\begin{equation}
+E \left[ \operatorname{Tr^2}(\hat{S})\right] = \operatorname{Tr^2}(\Sigma) + \frac{2}{n} \operatorname{Tr}(\Sigma^2) + \frac{\alpha}{n}
+\end{equation}
+which is very similar to the results in \cite{OAS} with the extra $\frac{\alpha}{n}$ term.
+Collating the results above gives us
+\begin{equation}
+\label{opt_rho}
+\rho_O = \frac{ (1-2/p) \operatorname{Tr}(\Sigma^2) + \operatorname{Tr^2}(\Sigma) + \alpha (1 - 1/p) }{ (n+1-2/p) \operatorname{Tr}(\Sigma^2) + (1 - n/p) \operatorname{Tr^2}(\Sigma) + \alpha (1 - 1/p) }
+\end{equation}
+
+\section{Extending OAS}\label{sec-extension}
+With the relevant formulation out of the way, we now consider the original design of OAS, but extended to include our new term $\alpha (1 - 1/p)$.
+As in \cite{OAS}, we have
+\begin{equation}
+\label{rho_eval}
+\hat{\rho}_{j+1} = \frac{ (1-2/p) \operatorname{Tr}(\hat{\Sigma}_j \hat{S} ) + \operatorname{Tr^2}( \hat{\Sigma}_j ) + \alpha (1 - 1/p) }{ (n+1-2/p) \operatorname{Tr}( \hat{\Sigma}_j \hat{S} ) + (1 - n/p) \operatorname{Tr^2}( \hat{\Sigma}_j ) + \alpha (1 - 1/p) } \\
+\end{equation}
+\begin{equation}
+\label{sigma_eval}
+\hat{\Sigma}_{j+1} = (1 - \hat{\rho}_{j+1}) \hat{S} + \hat{\rho}_{j+1} \hat{F} \\
+\end{equation}
+which leverages \eqref{opt_rho}, but replaces $\operatorname{Tr}(\Sigma)$ and $\operatorname{Tr}(\Sigma^2)$ with 
+$\operatorname{Tr}(\hat{\Sigma}_j)$ and $\operatorname{Tr}(\hat{\Sigma}_j \hat{S})$, respectively.
+Let
+\begin{equation}
+\hat{\phi} = \frac{ \operatorname{Tr}( \hat{S}^2 ) - \operatorname{Tr^2}( \hat{S} ) / p }{ (1-2/p) \operatorname{Tr}( \hat{S}^2 ) + \operatorname{Tr^2}( \hat{S} ) } = \frac{ \operatorname{Tr}( \hat{S}^2 ) - \operatorname{Tr^2}( \hat{S} ) / p }{ M }
+\end{equation}
+and $\beta = \alpha (1 -  1/p) / M$.
+Plugging in $\Sigma_j$ from \eqref{sigma_eval} and plugging into \eqref{rho_eval} yields
+\begin{equation}
+\hat{\rho}_{j+1} = \frac{ 1 + \beta - (1 - 2/p) \hat{\phi} \hat{\rho}_j }{ 1 + \beta + n \hat{\phi} - (n+1-2/p) \hat{\phi} \hat{\rho}_j }
+\end{equation}
+Using the change of variables
+\begin{equation}
+b_j  = \frac{1}{ 1 + \beta - (n+1-2/p) \hat{\phi} \hat{\rho}_j } \Leftrightarrow \hat{\rho}_j = \frac{ 1 + \beta - \frac{1}{b_j} }{ (n+1-2/p) \hat{\phi} },
+\end{equation}
+we obtain \eqref{rho_eval} is equivalent to
+\begin{equation}
+b_{j+1} =  \frac{  n \hat{\phi} }{ 1 + \beta - (1-2/p) \hat{\phi} } b_j + \frac{ 1 }{  1 + \beta - (1-2/p) \hat{\phi} }
+\end{equation}
+It is easy to see that
+\begin{equation}
+  \lim_{j \to \infty} b_j =
+    \begin{cases}
+      \infty & \frac{  n \hat{\phi} }{ 1 + \beta - (1-2/p) \hat{\phi} } \geq  1 \\
+      \frac{1}{1 + \beta - (n+1-2/p) \hat{\phi} }      & \frac{  n \hat{\phi} }{ 1 + \beta - (1-2/p) \hat{\phi} } < 1 \\
+    \end{cases}
+\end{equation}
+This implies 
+\begin{equation}
+  \lim_{j \to \infty} \hat{\rho}_j =
+    \begin{cases}
+      \frac{ 1 + \beta }{ (n+1-2/p) \hat{\phi} } & (n+1-2/p) \hat{\phi} \geq 1 + \beta \\
+      1                                          & (n+1-2/p) \hat{\phi} < 1 + \beta \\
+    \end{cases}
+\end{equation}
+or equivalently, 
+\begin{equation}
+\label{new_OAS}
+\rho_{OAS extended} = \operatorname{min}\left( 1, \frac{ 1 + \beta }{ (n+1-2/p) \hat{\phi} } \right)
+\end{equation}
+
+Note that, in the limit, we have $1 + \beta \geq 0$  (The proof is deferred to Appendix~\ref{app:proof}).
+
+What's left is a consistent estimator for the $\beta$ term.
+Given that $M = (1-2/p) \operatorname{Tr}( \hat{S}^2 ) + \operatorname{Tr^2}( \hat{S} )$ is already handed, this leaves the $\alpha$ term.
+Given its definition and \eqref{fourth_moment_eqn}, the natural choice for the estimator would be
+\begin{equation}
+\hat{\alpha} = \left( \sum_{i,j} \frac{1}{n} \sum_k (X_i^k)^2 (X_j^k)^2 \right) - \operatorname{Tr^2}(\hat{S}) - 2 \operatorname{Tr}(\hat{S}^2),
+\end{equation}
+which converges to the true $\alpha$ by the law of large numbers.
+However, for finite samples, $\hat{\alpha}$ may drift from $\alpha$, and thus recommend clamping the result, i.e.
+\begin{equation}
+\hat{\rho}_{OAS extended} = \operatorname{max} \left( 0, \operatorname{min}\left( 1, \frac{ 1 + \beta }{ (n+1-2/p) \hat{\phi} } \right) \right)
+\end{equation}
+
+\clearpage
+
+\appendix
+\section{Proof That $1 + \beta \geq 0$}
+\label{app:proof}
+It is obvious from \eqref{new_OAS} that $\rho_{OAS extended} \leq 1$, but leaves open the question of the lower bound.
+For this we analyze the numerator $1 + \beta$, and find that it is non-negative.
+\begin{proof}
+We observe
+$\sum_{i,j} E \left[ X_i^2  X_j^2 \right] = E \left[ \lVert X \rVert^4 \right]$ and
+$\operatorname{Tr^2}(\Sigma) = \left( E \left[ \lVert X \rVert^2 \right] \right)^2$.
+Thus,
+\[
+\alpha = \sum_{i,j} E \left[ X_i^2  X_j^2 \right] - \operatorname{Tr^2}(\Sigma) - 2 \operatorname{Tr}(\Sigma^2) = \operatorname{Var} \left(  \lVert X \rVert^2 \right) - 2 \operatorname{Tr}(\Sigma^2)
+\]
+implying $\alpha \geq - 2 \operatorname{Tr}(\Sigma^2)$.
+Noting $\beta = \alpha(1-1/p)/M$, it suffices to show
+\[
+-2\operatorname{Tr}(\Sigma^2) \cdot \frac{1-1/p}{M} \geq -1 \Rightarrow M \geq 2(1-1/p)\operatorname{Tr}(\Sigma^2).
+\]
+Substituting $M = (1-2/p)\operatorname{Tr}(\Sigma^2) + \operatorname{Tr}^2(\Sigma)$, this reduces to
+\[
+\operatorname{Tr}^2(\Sigma) \geq \operatorname{Tr}(\Sigma^2).
+\]
+For any positive semidefinite $\Sigma$ with eigenvalues $\lambda_1, \ldots, \lambda_p \geq 0$,
+\[
+\operatorname{Tr}^2(\Sigma) - \operatorname{Tr}(\Sigma^2)
+= \Bigl(\sum_i \lambda_i\Bigr)^2 - \sum_i \lambda_i^2
+= 2\sum_{i < j} \lambda_i \lambda_j \geq 0.
+\]
+Hence $1 + \beta \geq 0$, and $\rho_{OAS\text{ extended}} \in [0,1]$ for the true $\alpha$.
+\end{proof}
+
+\begin{thebibliography}{9}
+\bibitem{OAS}
+Y. Chen, A. Wiesel, Y. C. Eldar, and A. O. Hero, "Shrinkage algorithms for MMSE covariance estimation," 
+IEEE Transactions on Signal Processing, vol. 58, no. 10, pp. 5016–5029, Oct. 2010.
+\end{thebibliography}
+
+
+\end{document}
